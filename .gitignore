@@ -1,0 +1,4 @@
+.env
+tests/
+src/backend/__pycache__
+src/backend/uploads
