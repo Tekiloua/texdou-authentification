@@ -6,3 +6,6 @@ class Theme(Base):
     id = Column(Integer, primary_key=True, index=True)
     nom = Column(String, index=True)
     parent_id = Column(Integer, ForeignKey("themes.id"))
+    description = Column(String, index=True)
+    slug = Column(String, index=True)
+    couleur = Column(String, index=True)

@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String, Enum
+from sqlalchemy.orm import relationship
 from src.backend.db.database import Base
 import enum
 
@@ -25,4 +26,9 @@ class User(Base):
         nullable=False,
         default=UserRole.normal,
         server_default=UserRole.normal.value,  # valeur par défaut côté BDD aussi
+    )
+
+    # Relation inverse attendue par Conversation.user (back_populates="conversations")
+    conversations = relationship(
+        "Conversation", back_populates="user", cascade="all, delete-orphan"
     )

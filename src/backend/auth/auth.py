@@ -9,12 +9,11 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 from dotenv import load_dotenv
 import os
-from datetime import datetime, timedelta
 
 load_dotenv()
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM")
-ACCESS_TOKEN_EXPIRE_MINUTES = 60
+ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 12  # 12h par défaut
 REFRESH_TOKEN_EXPIRE_DAYS = 2
 
 
@@ -32,12 +31,12 @@ def verify_password(password, hashed_password):
     return pwd_context.verify(password, hashed_password)
 
 
-def create_access_token(data: dict):
+def create_access_token(data: dict, expires_delta: timedelta | None = None):
 
     to_encode = data.copy()
 
-    expire = datetime.utcnow() + timedelta(
-        minutes=ACCESS_TOKEN_EXPIRE_MINUTES
+    expire = datetime.utcnow() + (
+        expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     )
 
     to_encode.update({"exp": expire})
@@ -47,6 +46,7 @@ def create_access_token(data: dict):
         SECRET_KEY,
         algorithm=ALGORITHM
     )
+
 
 def create_refresh_token(data: dict):
 
@@ -66,6 +66,7 @@ def create_refresh_token(data: dict):
         SECRET_KEY,
         algorithm=ALGORITHM
     )
+
 
 def verify_token(token: str):
 
