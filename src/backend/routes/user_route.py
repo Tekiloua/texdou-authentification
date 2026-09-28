@@ -221,14 +221,18 @@ def delete_users(
             status_code=400, detail="Impossible de supprimer votre propre compte"
         )
 
-    deleted = (
-        db.query(User)
-        .filter(User.id.in_(ids))
-        .delete(synchronize_session=False)
-    )
+    # ⚠️ On charge les objets et on utilise db.delete() au lieu de
+    # query.delete() : la suppression en masse (bulk) génère un simple
+    # "DELETE FROM users ..." en SQL et IGNORE les cascades définies côté ORM
+    # (relationship(..., cascade="all, delete-orphan")). Avec db.delete(),
+    # SQLAlchemy supprime d'abord les conversations de l'utilisateur, ainsi que
+    # leurs messages (cascade Conversation -> Message), puis l'utilisateur.
+    users = db.query(User).filter(User.id.in_(ids)).all()
+    for u in users:
+        db.delete(u)
     db.commit()
 
-    return {"deleted": deleted}
+    return {"deleted": len(users)}
 
 
 @router.delete("/users/{user_id}")
